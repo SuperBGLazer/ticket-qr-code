@@ -9,7 +9,7 @@ import cv2
 import requests
 
 # Load Public Key for signature verification
-public_key_pem = requests.get("http://localhost:5000/public-key").text.encode()
+public_key_pem = requests.get("http://localhost:5000/api/public-key").text.encode()
 public_key = serialization.load_pem_public_key(public_key_pem)
 
 if not isinstance(public_key, rsa.RSAPublicKey):
