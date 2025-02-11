@@ -1,0 +1,12 @@
+<div class="scanner-container">
+    <zxing-scanner
+      (scanSuccess)="onScanSuccess($event)"
+      [tryHarder]="true"
+    ></zxing-scanner>
+  </div>
+  
+  <div class="results">
+    <p>{{ verificationMessage }}</p>
+    <p>{{ ticketId }}</p>
+  </div>
+  

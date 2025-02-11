@@ -1,0 +1,12 @@
+pyqrcode
+pypng
+flask
+cryptography
+pillow
+requests
+pyzbar
+types-requests
+pdf417gen
+opencv-python
+brotli
+qrcode[pil]

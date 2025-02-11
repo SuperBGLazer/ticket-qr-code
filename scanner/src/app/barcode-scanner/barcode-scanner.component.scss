@@ -1,0 +1,11 @@
+.scanner-container {
+    width: 600px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .results {
+    margin-top: 20px;
+    white-space: pre-line; /* so new lines in verificationMessage show properly */
+  }
+  

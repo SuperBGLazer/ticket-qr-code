@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Barcode Ticket</title>
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        img {
+            width: 100%;
+            max-height: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Barcode Ticket</h1>
+    <img id="barcode" src="/barcode" alt="Barcode Ticket" />
+    <script>
+        setInterval(() => {
+            const ts = new Date().getTime();
+            document.getElementById("barcode").src = "/barcode?" + ts;
+        }, 15000);
+    </script>
+</body>
+
+</html>
