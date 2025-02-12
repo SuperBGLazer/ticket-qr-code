@@ -2,3 +2,4 @@
 /.venv
 /barcode.png
 *.pem
+__pycache__

@@ -127,6 +127,7 @@ export class BarcodeScannerComponent implements OnInit {
    * Verifies signature with RSA-PSS (SHA-256).
    */
   private async verifySignature(data: string, signature: ArrayBuffer): Promise<boolean> {
+    console.log('Verifying signature:', data, signature);
     const encoder = new TextEncoder();
     const dataBuffer = encoder.encode(data);
 

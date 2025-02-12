@@ -1,6 +1,7 @@
 {
   "name": "scanner",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,6 +11,7 @@
   },
   "private": true,
   "dependencies": {
+    "@analogjs/vite-plugin-angular": "^1.13.0",
     "@angular/animations": "^18.1.0",
     "@angular/common": "^18.1.0",
     "@angular/compiler": "^18.1.0",
@@ -22,10 +24,11 @@
     "brotli-wasm": "^3.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "vite-plugin-static-copy": "^2.2.0",
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.1.0",
+    "@angular-devkit/build-angular": "^18.2.14",
     "@angular/cli": "^18.1.0",
     "@angular/compiler-cli": "^18.1.0",
     "@types/jasmine": "~5.1.0",
@@ -35,6 +38,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.2"
+    "typescript": "~5.5.2",
+    "vite": "^5.4.14"
   }
 }

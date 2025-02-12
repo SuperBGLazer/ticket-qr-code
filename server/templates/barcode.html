@@ -25,11 +25,11 @@
 
 <body>
     <h1>Barcode Ticket</h1>
-    <img id="barcode" src="/barcode" alt="Barcode Ticket" />
+    <img id="barcode" src="/api/barcode" alt="Barcode Ticket" />
     <script>
         setInterval(() => {
             const ts = new Date().getTime();
-            document.getElementById("barcode").src = "/barcode?" + ts;
+            document.getElementById("barcode").src = "/api/barcode?" + ts;
         }, 15000);
     </script>
 </body>

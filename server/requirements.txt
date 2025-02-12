@@ -10,3 +10,4 @@ pdf417gen
 opencv-python
 brotli
 qrcode[pil]
+gunicorn
