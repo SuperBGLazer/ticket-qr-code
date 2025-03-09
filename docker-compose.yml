@@ -5,6 +5,8 @@ services:
       - "0.0.0.0:5002:80"
     depends_on:
       - backend
+    volumes:
+      - ./scanner/dist/scanner/browser:/usr/share/nginx/html
   
 
   backend:
@@ -13,3 +15,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "0.0.0.0:5003:5000"
+    volumes:
+      - ./server:/app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+  
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6380:6380"

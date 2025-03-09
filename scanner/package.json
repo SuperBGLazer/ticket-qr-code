@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build && cp node_modules/brotli-wasm/pkg.web/brotli_wasm_bg.wasm dist/scanner/browser",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -20,6 +20,7 @@
     "@angular/platform-browser": "^18.1.0",
     "@angular/platform-browser-dynamic": "^18.1.0",
     "@angular/router": "^18.1.0",
+    "@niyari/base32-ts": "^0.0.4",
     "@zxing/ngx-scanner": "^19.0.0",
     "brotli-wasm": "^3.0.1",
     "rxjs": "~7.8.0",

@@ -39,18 +39,18 @@ def load_rsa():
 
 def generate_barcode(ticket_id: str, private_key) -> BytesIO:
     timestamp = int(time.time() // 30)
-    barcode_data = json.dumps({"ticket_id": ticket_id, "timestamp": timestamp})
+    barcode_data = json.dumps({"i": ticket_id, "t": timestamp})
     signature = private_key.sign(
         barcode_data.encode(),
         padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32),
         hashes.SHA256()
     )
-    barcode_payload = base64.b64encode(barcode_data.encode()).decode()
-    signature_payload = base64.b64encode(signature).decode()
-    barcode_final = json.dumps({"data": barcode_payload, "signature": signature_payload})
-    compressed_barcode = base64.b64encode(brotli.compress(barcode_final.encode())).decode()
+    barcode_payload = base64.b32encode(barcode_data.encode()).decode()
+    signature_payload = base64.b32encode(signature).decode()
+    barcode_final = json.dumps({"d": barcode_payload, "s": signature_payload})
+    print(f"Generated barcode: {barcode_final}")
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
-    qr.add_data(compressed_barcode)
+    qr.add_data(barcode_final)
     qr.make(fit=True)
     img = qr.make_image(fill='black', back_color='white')
     buffer = BytesIO()

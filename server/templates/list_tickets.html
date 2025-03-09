@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket List</title>
+    <script>
+        async function fetchTickets() {
+            const response = await fetch('/api/tickets');
+            const tickets = await response.json();
+            const ticketList = document.getElementById("ticketList");
+            ticketList.innerHTML = "";
+            tickets.forEach(ticket => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    Ticket ID: ${ticket.ticket_id} | Section: ${ticket.section} | Row: ${ticket.row} | Seat: ${ticket.seat} | Scanned: ${ticket.scanned}
+                    <a href="/api/display/${ticket.ticket_id}" target="_blank">View Barcode</a>
+                    <button onclick="deleteTicket('${ticket.ticket_id}')">Delete</button>
+                `;
+                ticketList.appendChild(li);
+            });
+        }
+
+        async function deleteTicket(ticketId) {
+            const response = await fetch(`/api/ticket/${ticketId}`, {
+                method: 'DELETE'
+            });
+            if(response.ok) {
+                fetchTickets();
+            } else {
+                alert("Failed to delete ticket");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchTickets);
+    </script>
+</head>
+<body>
+    <h1>Tickets</h1>
+    <a href="/api/create-ticket">Create Ticket</a>
+    <ul id="ticketList"></ul>
+</body>
+</html>

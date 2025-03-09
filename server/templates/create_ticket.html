@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Ticket</title>
+  <script>
+    async function createTicket(event) {
+      event.preventDefault();
+      const section = document.getElementById("ticketSection").value;
+      const row = document.getElementById("ticketRow").value;
+      const seat = document.getElementById("ticketSeat").value;
+
+      const response = await fetch("/api/ticket", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ section, row, seat })
+      });
+
+      const result = await response.json();
+      if(response.ok) {
+        document.getElementById("result").innerText = "Ticket Created: " + JSON.stringify(result);
+      } else {
+        document.getElementById("result").innerText = "Error: " + JSON.stringify(result);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Create Ticket</h1>
+  <form onsubmit="createTicket(event)">
+    <div>
+      <label for="ticketSection">Section:</label>
+      <input type="text" id="ticketSection" name="ticketType" required>
+    </div>
+    <br>
+    <div>
+      <label for="ticketRow">Row:</label>
+      <input type="text" id="ticketRow" name="ticketRow" required>
+    </div>
+    <br>
+    <div>
+      <label for="ticketSeat">Seat:</label>
+      <input type="text" id="ticketSeat" name="ticketSeat" required>
+    </div>
+    <br>
+    <button type="submit">Create Ticket</button>
+  </form>
+  <div id="result"></div>
+</body>
+</html>

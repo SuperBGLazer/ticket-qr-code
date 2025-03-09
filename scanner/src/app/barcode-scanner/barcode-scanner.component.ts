@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { from, lastValueFrom } from 'rxjs';
 
-// Use the ESM version of Brotli from 'brotli-wasm'
-import brotliPromise from 'brotli-wasm';
+import { Base32 } from '@niyari/base32-ts';
 
 @Component({
   selector: 'app-barcode-scanner',
@@ -18,6 +16,7 @@ export class BarcodeScannerComponent implements OnInit {
   verificationMessage: string = '';
   ticketId: string = '';
 
+
   // The public key (in SubtleCrypto format) once loaded
   publicKey!: CryptoKey;
 
@@ -29,28 +28,30 @@ export class BarcodeScannerComponent implements OnInit {
     const publicKeyPem = await lastValueFrom(this.http.get('/api/public-key', { responseType: 'text' }));
     this.publicKey = await this.importRsaPssKey(publicKeyPem);
 
-    // 2) Ensure the brotli wasm module is loaded before scanning
-    await brotliPromise;
   }
 
   // This method is triggered when a QR/Barcode is detected
   public async onScanSuccess(barcodeData: string): Promise<void> {
-    // Decompress the data (it’s base64-encoded, then Brotli-compressed JSON).
     try {
-      const decompressedJson = await this.decompressBrotliData(barcodeData);
+      // 1) Decompress the data (it’s base32-encoded, then Brotli-compressed JSON).
+      // const decompressedJson = await this.decompressBrotliData(barcodeData);
+      const decompressedJson = barcodeData
+      console.log('Decompressed JSON String:', decompressedJson);
 
       // The decompressed result should be JSON in the format:
       //  {
-      //    "data": "<base64-encoded JSON>",
-      //    "signature": "<base64-encoded signature>"
+      //    "d": "<base32-encoded JSON data>",
+      //    "s": "<base32-encoded signature>"
       //  }
       const barcodeJson = JSON.parse(decompressedJson);
+      console.log('Decompressed JSON:', barcodeJson);
 
-      // Next, decode the 'data' portion (base64 -> string)
-      const dataStr = atob(barcodeJson.data);
+      // Next, decode the 'data' portion (base32 -> string)
+      const dataBytes = this.base32Decode(barcodeJson.d);
+      const dataStr = new TextDecoder().decode(dataBytes);
 
-      // Decode the signature
-      const signature = this.base64ToArrayBuffer(barcodeJson.signature);
+      // Decode the signature (base32 -> ArrayBuffer)
+      const signature = this.base32Decode(barcodeJson.s).buffer;
 
       // 3) Verify signature with the public key
       const verified = await this.verifySignature(dataStr, signature);
@@ -62,35 +63,49 @@ export class BarcodeScannerComponent implements OnInit {
 
       // 4) Check the timestamp
       const barcodeInfo = JSON.parse(dataStr);
+      console.log('Barcode Info:', barcodeInfo);
       const currentTimestamp30s = Math.floor(Date.now() / 1000 / 30);
-      if (barcodeInfo.timestamp === currentTimestamp30s) {
-        this.verificationMessage += '\n✅ Barcode is valid for entry';
+      if (barcodeInfo.t === currentTimestamp30s) {
+        this.verificationMessage += '\n✅ Verifying Ticket...';
+
+        this.verifyTicket(barcodeInfo.i);
       } else {
         this.verificationMessage += '\n❌ Expired Barcode';
       }
 
       // 5) Output ticket info
-      this.ticketId = `Ticket ID: ${barcodeInfo.ticket_id}`;
+      this.ticketId = barcodeInfo.i;
     } catch (error) {
       console.error('Error verifying barcode:', error);
       this.verificationMessage = 'Error verifying the barcode.';
     }
   }
 
+  private verifyTicket(ticketId: string): void {
+    // Send a POST request to your server to verify the ticket ID
+
+    if (this.ticketId === ticketId) {
+      this.verificationMessage = '✅ Ticket is valid';
+      return;
+    }
+
+    this.http.get<any>('/api/scan-ticket/' + ticketId).subscribe((response) => {
+      if (response.success) {
+        this.verificationMessage = '✅ Ticket is valid';
+      } else {
+        this.verificationMessage = '❌ Invalid Ticket';
+      }
+    });
+  }
+
+
   /**
-   * Decompresses the raw base64-encoded, Brotli-compressed string.
+   * Converts a base32 encoded string into a Uint8Array.
    */
-  private async decompressBrotliData(base64Compressed: string): Promise<string> {
-    // 1) base64 -> Uint8Array
-    const compressedBytes = this.base64ToUint8Array(base64Compressed);
-
-    // 2) Decompress via brotli-wasm
-    //    Wait for the brotli wasm to be ready
-    const brotli = await brotliPromise;
-    const decompressedBytes = brotli.decompress(compressedBytes);
-
-    // 3) Convert to string
-    return new TextDecoder().decode(decompressedBytes);
+  private base32Decode(input: string): any {
+    const base32 = new Base32({raw: true});
+    const output = base32.decode(input);
+    return output
   }
 
   /**
@@ -134,31 +149,11 @@ export class BarcodeScannerComponent implements OnInit {
     return crypto.subtle.verify(
       {
         name: 'RSA-PSS',
-        saltLength: 32, // adjust if needed (for a 2048-bit key, 32 is typical)
+        saltLength: 32,
       },
       this.publicKey,
       signature,
       dataBuffer
     );
-  }
-
-  /**
-   * Helper to convert a base64 string to ArrayBuffer
-   */
-  private base64ToArrayBuffer(base64: string): ArrayBuffer {
-    const binaryString = window.atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
-
-  /**
-   * Helper to convert base64 -> Uint8Array
-   */
-  private base64ToUint8Array(base64: string): Uint8Array {
-    return new Uint8Array(this.base64ToArrayBuffer(base64));
   }
 }
